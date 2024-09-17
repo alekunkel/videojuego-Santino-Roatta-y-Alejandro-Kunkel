@@ -17,14 +17,17 @@ const cargarvideojuego = () => {
   }
   const puntajeNumerico = Number(videojuego.value.puntaje);
   if (isNaN(puntajeNumerico)) {
-  alert('El puntaje debe ser un valor numérico.');
-  return;
-}
-if (videojuego.value.puntaje && (isNaN(puntajeNumerico) || puntajeNumerico < 0 || puntajeNumerico > 10)) {
-  alert('El puntaje debe ser un valor numérico entre 1 y 10.');
-  return;
-}
-  videojuegos.value.push({ ...videojuego.value });
+    alert('El puntaje debe ser un valor numérico.');
+    return;
+  }
+  if (videojuego.value.puntaje && (isNaN(puntajeNumerico) || puntajeNumerico < 0 || puntajeNumerico > 10)) {
+    alert('El puntaje debe ser un valor numérico entre 1 y 10.');
+    return;
+  }
+  videojuegos.value.push({
+    ...videojuego.value,
+    isVisible: false
+  });
   videojuego.value = {
     nombre: '',
     plataforma: '',
@@ -33,51 +36,42 @@ if (videojuego.value.puntaje && (isNaN(puntajeNumerico) || puntajeNumerico < 0 |
   };
 };
 
+const mostrarDetalles = ref(null);
+
+function toggleDetalles(index) {
+  mostrarDetalles.value = mostrarDetalles.value === index ? null : index;
+}
 </script>
+
 <template>
   <h1>Administración de Videojuegos</h1>
   <h2>Nuevo Videojuego</h2>
-  <form @submit.prevent="cargarvideojuego()">
-      <label for="nombre">nombre:</label>
-      <input type="text" v-model="videojuego.nombre" placeholder="ingrese aqui el videojuego"><br>
-      <label for="">Plataforma</label>
-      <select v-model="videojuego.plataforma">
-        <option value="">PC | Playstation | Xbox</option>
-        <option value="xbox">Xbox</option>
-        <option value="playstation">PlayStation</option>
-        <option value="pc">PC</option>
-      </select><br>
-      <label for="">estado</label>
-      <select v-model="videojuego.estado">
-        <option value="">Pendiente | Jugando | Completado </option>
-        <option value="completado"> Completado </option>
-        <option value="pendiente">Pendiente </option> 
-        <option value="en proceso">En Proceso </option>
-      </select><br>
-      <label for="puntaje">Puntaje:</label>
-      <input type="text" v-model="videojuego.puntaje" placeholder="valor numerico del 1 al 10"><br>
-      <div class="cargarcss">
-        <input type="submit" value="registrar videojuego">
-      </div>
+  <form @submit.prevent="cargarvideojuego">
+    <label for="nombre">Nombre:</label>
+    <input type="text" v-model="videojuego.nombre" placeholder="Ingrese el nombre del videojuego"><br>
+    <label for="plataforma">Plataforma:</label>
+    <select v-model="videojuego.plataforma">
+      <option value="">PC | Playstation | Xbox</option>
+      <option value="xbox">Xbox</option>
+      <option value="playstation">PlayStation</option>
+      <option value="pc">PC</option>
+    </select><br>
+    <label for="estado">Estado:</label>
+    <select v-model="videojuego.estado">
+      <option value="">Pendiente | Jugando | Completado</option>
+      <option value="completado">Completado</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="en proceso">En Proceso</option>
+    </select><br>
+    <label for="puntaje">Puntaje:</label>
+    <input type="text" v-model="videojuego.puntaje" placeholder="Valor numérico del 1 al 10"><br>
+    <div class="cargarcss">
+      <input type="submit" value="Registrar Videojuego">
+    </div>
   </form>
-  <h2> Videojuegos</h2>
+  
+  <h2>Videojuegos</h2>
   <div>
-    <label for="">Nombre</label>
-    <input type="text">
-    <label for="">Plataforma</label>
-      <select v-model="videojuego.plataforma">        
-        <option value="xbox">Xbox</option>
-        <option value="playstation">PlayStation</option>
-        <option value="pc">PC</option>
-      </select>
-      <label for="">estado</label>
-      <select v-model="videojuego.estado">
-        <option value="completado"> Completado </option>
-        <option value="pendiente">Pendiente </option> 
-        <option value="en proceso">En Proceso </option>
-      </select>
-  </div>
-  <div class="tabla">
     <table>
       <thead>
         <tr>
@@ -94,13 +88,34 @@ if (videojuego.value.puntaje && (isNaN(puntajeNumerico) || puntajeNumerico < 0 |
           <td><span>{{ vg.plataforma }}</span></td>
           <td><span>{{ vg.estado }}</span></td>
           <td><span>{{ vg.puntaje }}</span></td>
-          <td><span><button @click="masinfo">+</button></span></td>
+          <td><span><button @click="toggleDetalles(index)">+</button></span></td>
         </tr>
-</tbody>   
+      </tbody>
     </table>
   </div>
+  
+  <!-- Tabla de detalles, separada -->
+  <div v-if="mostrarDetalles !== null">
+    <h2>Detalles del Videojuego</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Plataforma</th>
+          <th>Puntaje</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-if="mostrarDetalles !== null">
+          <td><span>{{ videojuegos[mostrarDetalles].nombre }}</span></td>
+          <td><span>{{ videojuegos[mostrarDetalles].plataforma }}</span></td>
+          <td><span>{{ videojuegos[mostrarDetalles].puntaje }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
 
-   </template>
 <style scoped>
 :global(body) {
   background: linear-gradient(to bottom right, green, yellow);
@@ -113,11 +128,6 @@ if (videojuego.value.puntaje && (isNaN(puntajeNumerico) || puntajeNumerico < 0 |
   background-color: red;
   border-radius: 4px;
 }
-.tabla {
-  width: 100%;
-  height: auto;
-}
-
 thead {
   background-color: #4CAF50;
   color: white;
@@ -159,4 +169,3 @@ input[type="submit"]:hover {
 }
 </style>
 
-  
