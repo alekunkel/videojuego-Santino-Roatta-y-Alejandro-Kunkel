@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const videojuego = ref({
   nombre: '',
@@ -9,6 +9,9 @@ const videojuego = ref({
 });
 
 const videojuegos = ref([]);
+const filtroNombre = ref('');
+const filtroPlataforma = ref('');
+const filtroEstado = ref('');
 
 const cargarvideojuego = () => {
   if (!videojuego.value.nombre || !videojuego.value.plataforma || !videojuego.value.estado) {
@@ -20,7 +23,7 @@ const cargarvideojuego = () => {
     alert('El puntaje debe ser un valor numérico.');
     return;
   }
-  if (videojuego.value.puntaje && (isNaN(puntajeNumerico) || puntajeNumerico < 0 || puntajeNumerico > 10)) {
+  if (videojuego.value.puntaje && (isNaN(puntajeNumerico) || puntajeNumerico < 1 || puntajeNumerico > 10)) {
     alert('El puntaje debe ser un valor numérico entre 1 y 10.');
     return;
   }
@@ -41,6 +44,19 @@ const mostrarDetalles = ref(null);
 function toggleDetalles(index) {
   mostrarDetalles.value = mostrarDetalles.value === index ? null : index;
 }
+
+// Computed property para filtrar videojuegos
+const videojuegosFiltrados = computed(() => {
+  const lowerFiltroNombre = filtroNombre.value.toLowerCase();
+  const lowerFiltroPlataforma = filtroPlataforma.value.toLowerCase();
+  const lowerFiltroEstado = filtroEstado.value.toLowerCase();
+
+  return videojuegos.value.filter(vg => 
+    vg.nombre.toLowerCase().includes(lowerFiltroNombre) &&
+    vg.plataforma.toLowerCase().includes(lowerFiltroPlataforma) &&
+    vg.estado.toLowerCase().includes(lowerFiltroEstado)
+  );
+});
 </script>
 
 <template>
@@ -51,14 +67,14 @@ function toggleDetalles(index) {
     <input type="text" v-model="videojuego.nombre" placeholder="Ingrese el nombre del videojuego"><br>
     <label for="plataforma">Plataforma:</label>
     <select v-model="videojuego.plataforma">
-      <option value="">PC | Playstation | Xbox</option>
+      <option value="">Seleccione una plataforma</option>
       <option value="xbox">Xbox</option>
       <option value="playstation">PlayStation</option>
       <option value="pc">PC</option>
     </select><br>
     <label for="estado">Estado:</label>
     <select v-model="videojuego.estado">
-      <option value="">Pendiente | Jugando | Completado</option>
+      <option value="">Seleccione un estado</option>
       <option value="completado">Completado</option>
       <option value="pendiente">Pendiente</option>
       <option value="en proceso">En Proceso</option>
@@ -70,6 +86,26 @@ function toggleDetalles(index) {
     </div>
   </form>
   
+  <h2>Filtrar Videojuegos</h2>
+  <label for="filtroNombre">Nombre:</label>
+  <input type="text" v-model="filtroNombre" placeholder="Filtrar por nombre...">
+  
+  <label for="filtroPlataforma">Plataforma:</label>
+  <select v-model="filtroPlataforma">
+    <option value="">Todas las plataformas</option>
+    <option value="xbox">Xbox</option>
+    <option value="playstation">PlayStation</option>
+    <option value="pc">PC</option>
+  </select>
+  
+  <label for="filtroEstado">Estado:</label>
+  <select v-model="filtroEstado">
+    <option value="">Todos los estados</option>
+    <option value="completado">Completado</option>
+    <option value="pendiente">Pendiente</option>
+    <option value="en proceso">En Proceso</option>
+  </select>
+
   <h2>Videojuegos</h2>
   <div>
     <table>
@@ -83,7 +119,7 @@ function toggleDetalles(index) {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(vg, index) in videojuegos" :key="index">
+        <tr v-for="(vg, index) in videojuegosFiltrados" :key="index">
           <td><span>{{ vg.nombre }}</span></td>
           <td><span>{{ vg.plataforma }}</span></td>
           <td><span>{{ vg.estado }}</span></td>
@@ -94,7 +130,6 @@ function toggleDetalles(index) {
     </table>
   </div>
   
-  <!-- Tabla de detalles, separada -->
   <div v-if="mostrarDetalles !== null">
     <h2>Detalles del Videojuego</h2>
     <table>
@@ -153,7 +188,7 @@ tbody tr:nth-child(even) {
 
 th {
   cursor: pointer;
-  color:chocolate; 
+  color: chocolate; 
 }
 
 input[type="text"], select {
@@ -168,4 +203,6 @@ input[type="submit"]:hover {
   background-color: #45a049;
 }
 </style>
+
+
 
